@@ -1,0 +1,86 @@
+// schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model users {
+  id         Int     @default(cuid()) @id
+  first_Name String
+  last_Name  String
+  mail       String @default(false)
+  phone_num  Int
+  sign_token Int
+  author     User?   @relation(fields: [authorId], references: [id])
+  authorId   String?
+}
+
+model cars {
+  id            Int       @default(cuid()) @id
+  users_id      Int
+  category_details_id   Int   @unique
+  auctions_id   Int  @default(now()) @map(name: "created_at")
+  listings_id   Int  @updatedAt @map(name: "updated_at")
+  vintage       Int
+  posts         Post[]
+  @@map(name: "users")
+}
+
+model listings {
+  id            Int       @default(cuid()) @id
+  users_id      Int
+  starting_date DateTime  @unique
+  ending_date   DateTime  @default(now()) @map(name: "created_at")
+  price         Int  @updatedAt @map(name: "updated_at")
+  changed_price Int  @updatedAt @map(name: "updated_at")
+  description   Int
+  posts         Post[]
+  @@map(name: "users")
+}
+
+model auctions {
+  id            Int       @default(cuid()) @id
+  users_id      Int
+  starting_date DateTime  @default(now()) @map(name: "created_at")
+  ending_date   DateTime  @updatedAt @map(name: "updated_at")
+  price         Int  @updatedAt @map(name: "updated_at")
+  bids          Int
+  description   Int
+  posts         Post[]
+  @@map(name: "users")
+}
+
+model models {
+  id            Int       @default(cuid()) @id
+  model_name    String
+  cars          Int   @unique
+  posts         Post[]
+  @@map(name: "users")
+}
+
+model brands {
+  id            Int       @default(cuid()) @id
+  brand_name    String
+  models_id     Int   @unique
+  posts         Post[]
+  @@map(name: "users")
+}
+
+model category_details {
+  id            Int       @default(cuid()) @id
+  type          String
+  posts         Post[]
+  @@map(name: "users")
+}
+
+model category {
+  id            Int       @default(cuid()) @id
+  category_details_id   Int
+  value         String   @unique
+  posts         Post[]
+  @@map(name: "users")
+}
