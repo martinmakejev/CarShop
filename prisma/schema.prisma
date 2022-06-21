@@ -24,14 +24,14 @@ model Cars {
   id                  Int              @id @default(autoincrement())
   users_id            Int              @unique
   category_details_id Int              @unique
-  auctions_id         Int              @unique
-  listings_id         Int              @unique
-  vin                 Int              @unique
+  auctions_id         Int?             @unique
+  listings_id         Int?             @unique
+  vin                 String           @unique
   car_owner           Users            @relation(fields: [users_id], references: [id])
   car_category        Category_details @relation(fields: [category_details_id], references: [id])
   car_model           Models           @relation(fields: [id], references: [cars_id])
-  Listings            Listings[]
-  Auctions            Auctions[]
+  car_listing         Listings?        @relation(fields: [listings_id], references: [id])
+  car_auction         Auctions?        @relation(fields: [auctions_id], references: [id])
 }
 
 model Listings {
@@ -40,9 +40,9 @@ model Listings {
   starting_date DateTime @updatedAt
   ending_date   DateTime
   price         Int
-  changed_price Int
-  description   Int
-  car           Cars     @relation(fields: [id], references: [listings_id])
+  changed_price Int?
+  description   String
+  Cars          Cars?
   listing_owner Users    @relation(fields: [users_id], references: [id])
 }
 
@@ -54,7 +54,7 @@ model Auctions {
   price         Int
   bids          Int
   description   Int
-  car           Cars     @relation(fields: [id], references: [auctions_id])
+  Cars          Cars?
   auction_owner Users    @relation(fields: [users_id], references: [id])
 }
 
