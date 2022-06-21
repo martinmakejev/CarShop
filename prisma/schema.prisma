@@ -1,6 +1,6 @@
 // schema.prisma
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -8,79 +8,81 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model users {
-  id         Int     @default(cuid()) @id
+model Users {
+  id         Int        @id @default(autoincrement())
   first_Name String
   last_Name  String
-  mail       String @default(false)
-  phone_num  Int
+  mail       String     @unique
+  phone_num  Int        @unique
   sign_token Int
-  author     User?   @relation(fields: [authorId], references: [id])
-  authorId   String?
+  Cars       Cars[]
+  Listings   Listings[]
+  Auctions   Auctions[]
 }
 
-model cars {
-  id            Int       @default(cuid()) @id
-  users_id      Int
-  category_details_id   Int   @unique
-  auctions_id   Int  @default(now()) @map(name: "created_at")
-  listings_id   Int  @updatedAt @map(name: "updated_at")
-  vintage       Int
-  posts         Post[]
-  @@map(name: "users")
+model Cars {
+  id                  Int              @id @default(autoincrement())
+  users_id            Int              @unique
+  category_details_id Int              @unique
+  auctions_id         Int              @unique
+  listings_id         Int              @unique
+  vin                 Int              @unique
+  car_owner           Users            @relation(fields: [users_id], references: [id])
+  car_category        Category_details @relation(fields: [category_details_id], references: [id])
+  car_model           Models           @relation(fields: [id], references: [cars_id])
+  Listings            Listings[]
+  Auctions            Auctions[]
 }
 
-model listings {
-  id            Int       @default(cuid()) @id
-  users_id      Int
-  starting_date DateTime  @unique
-  ending_date   DateTime  @default(now()) @map(name: "created_at")
-  price         Int  @updatedAt @map(name: "updated_at")
-  changed_price Int  @updatedAt @map(name: "updated_at")
+model Listings {
+  id            Int      @id @default(autoincrement())
+  users_id      Int      @unique
+  starting_date DateTime @updatedAt
+  ending_date   DateTime
+  price         Int
+  changed_price Int
   description   Int
-  posts         Post[]
-  @@map(name: "users")
+  car           Cars     @relation(fields: [id], references: [listings_id])
+  listing_owner Users    @relation(fields: [users_id], references: [id])
 }
 
-model auctions {
-  id            Int       @default(cuid()) @id
-  users_id      Int
-  starting_date DateTime  @default(now()) @map(name: "created_at")
-  ending_date   DateTime  @updatedAt @map(name: "updated_at")
-  price         Int  @updatedAt @map(name: "updated_at")
+model Auctions {
+  id            Int      @id @default(autoincrement())
+  users_id      Int      @unique
+  starting_date DateTime @updatedAt
+  ending_date   DateTime
+  price         Int
   bids          Int
   description   Int
-  posts         Post[]
-  @@map(name: "users")
+  car           Cars     @relation(fields: [id], references: [auctions_id])
+  auction_owner Users    @relation(fields: [users_id], references: [id])
 }
 
-model models {
-  id            Int       @default(cuid()) @id
+model Models {
+  id            Int    @id @default(autoincrement())
   model_name    String
-  cars          Int   @unique
-  posts         Post[]
-  @@map(name: "users")
+  cars_id       Int    @unique
+  models_brands Brands @relation(fields: [id], references: [models_id])
+  Cars          Cars[]
 }
 
-model brands {
-  id            Int       @default(cuid()) @id
-  brand_name    String
-  models_id     Int   @unique
-  posts         Post[]
-  @@map(name: "users")
+model Brands {
+  id         Int      @id @default(autoincrement())
+  brand_name String
+  models_id  Int      @unique
+  models     Models[]
 }
 
-model category_details {
-  id            Int       @default(cuid()) @id
+model Category_details {
+  id            Int      @id @default(autoincrement())
   type          String
-  posts         Post[]
-  @@map(name: "users")
+  category      Category @relation(fields: [id], references: [category_details_id])
+  cars_category Cars?
 }
 
-model category {
-  id            Int       @default(cuid()) @id
-  category_details_id   Int
-  value         String   @unique
-  posts         Post[]
-  @@map(name: "users")
+model Category {
+  id                  Int               @id @default(autoincrement())
+  category_details_id Int               @unique
+  value               String
+  category_details    Category_details?
 }
